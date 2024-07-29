@@ -375,7 +375,11 @@ export default function CustomerDetailPage(): React.JSX.Element {
         </Stack>
         <Divider sx={{ my: 2 }} />
         <Typography variant="h6">Contatos Telefônicos</Typography>
-        <PhoneContactsTable contacts={customer.phoneContacts} />
+        <PhoneContactsTable 
+          contacts={customer.phoneContacts}
+          onUpdateContact={() => {}}
+          editable={isEditing} // ou false, dependendo se você deseja a tabela editável ou não
+        />
         <Divider sx={{ my: 2 }} />
         <Typography variant="h6">Contatos de E-mail</Typography>
         <EmailContactsTable contacts={customer.emailContacts} />

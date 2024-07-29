@@ -1,13 +1,37 @@
-// src/components/dashboard/customer/PhoneContactsTable.tsx
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import React from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Checkbox } from '@mui/material';
+import React, { useState } from 'react';
 import { PhoneContact } from '@/types/customer-api';
+import CheckIcon from '@mui/icons-material/Check'; // Ícone de marcação
+import ClearIcon from '@mui/icons-material/Clear'; // Ícone de não marcação
 
 interface PhoneContactsTableProps {
-  contacts: PhoneContact[]; // Nome da prop deve ser 'contacts' para corresponder ao que está sendo passado
+  contacts: PhoneContact[];
+  onUpdateContact: (updatedContact: PhoneContact) => void; // Função para atualizar o contato
+  editable: boolean; // Propriedade para definir se a tabela está editável
 }
 
-const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts }) => {
+const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpdateContact, editable }) => {
+  const [editingContact, setEditingContact] = useState<PhoneContact | null>(null);
+  const [localContacts, setLocalContacts] = useState(contacts);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>, field: keyof PhoneContact) => {
+    const { value, checked, type } = event.target;
+  
+    const updatedContacts = localContacts.map(contact =>
+      contact.phone === editingContact?.phone
+        ? {
+            ...contact,
+            [field]: type === 'checkbox' ? checked : value
+          }
+        : contact
+    );
+  
+    setLocalContacts(updatedContacts);
+  
+    // Se precisar salvar automaticamente, descomente a linha abaixo:
+    // onUpdateContact(updatedContacts.find(c => c.phone === editingContact?.phone) || contact);
+  };
+
   const columns = [
     { id: 'phone', label: 'Telefone' },
     { id: 'name', label: 'Nome' },
@@ -25,11 +49,43 @@ const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts }) => 
           </TableRow>
         </TableHead>
         <TableBody>
-          {contacts.map((contact) => (
+          {localContacts.map((contact) => (
             <TableRow key={contact.phone}>
-              <TableCell>{contact.phone}</TableCell>
-              <TableCell>{contact.name}</TableCell>
-              <TableCell>{contact.isWhatsapp ? 'Sim' : 'Não'}</TableCell>
+              <TableCell>
+                {editable ? (
+                  <TextField
+                    value={contact.phone}
+                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'phone')}
+                    fullWidth
+                  />
+                ) : (
+                  contact.phone
+                )}
+              </TableCell>
+              <TableCell>
+                {editable ? (
+                  <TextField
+                    value={contact.name}
+                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'name')}
+                    fullWidth
+                  />
+                ) : (
+                  contact.name
+                )}
+              </TableCell>
+              <TableCell>
+                {editable ? (
+                  <Checkbox
+                    checked={contact.isWhatsapp}
+                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'isWhatsapp')}
+                  />
+                ) : contact.isWhatsapp ? (
+                  <CheckIcon color="success" />
+                ) : (
+                  <ClearIcon color="error" />
+                )}
+              </TableCell>
+
             </TableRow>
           ))}
         </TableBody>
