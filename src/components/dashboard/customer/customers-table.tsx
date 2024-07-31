@@ -57,9 +57,11 @@ const CustomersTable: React.FC<CustomersTableProps> = ({ rows, count, onRowClick
                 },
               }}
             >
-              <TableCell><Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />{row.name}
-                    </Stack></TableCell>
+              <TableCell>
+                <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
+                    <Avatar src={row.avatar} />{row.name}
+                </Stack>
+              </TableCell>
               <TableCell>{row.email}</TableCell>
               <TableCell>{row.phone}</TableCell>
               <TableCell>{`${row.address.street}, ${row.address.city}, ${row.address.state}, ${row.address.country}`}</TableCell>

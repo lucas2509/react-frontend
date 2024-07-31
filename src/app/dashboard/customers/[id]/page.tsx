@@ -201,9 +201,9 @@ export default function CustomerDetailPage(): React.JSX.Element {
           )}
         </Stack>
       </Stack>
-      <Card sx={{ p: 2 }}>
-        <Typography variant="h6">Informações Pessoais</Typography>
-        <Divider sx={{ mb: 2 }} />
+      <Card sx={{p: 2}}>
+        <Typography variant="h6">Informações Cadastrais</Typography>
+        <Divider sx={{ my: 2 }} />
         <Stack spacing={1}>
           {isEditing ? (
             <>
@@ -278,11 +278,14 @@ export default function CustomerDetailPage(): React.JSX.Element {
             </>
           )}
         </Stack>
+      </Card>
+      <Card sx={{p: 2}}>
+        <Typography variant="h6">Endereços</Typography>
         <Divider sx={{ my: 2 }} />
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           {isEditing ? (
             <>
-            <Typography variant="h6">Endereço</Typography>
+            <Stack direction="row" >
             <TextField
               name="address.street"
               label="Endereço"
@@ -297,6 +300,8 @@ export default function CustomerDetailPage(): React.JSX.Element {
               onChange={handleInputChange}
               fullWidth
             />
+            </Stack>
+            
             <TextField
               name="address.neighborhood"
               label="Bairro"
@@ -390,27 +395,26 @@ export default function CustomerDetailPage(): React.JSX.Element {
             </>
           )}
         </Stack>
-        <Divider sx={{ my: 2 }} />
+      </Card>
+      <Card sx={{p: 2}}>
         <Typography variant="h6">Contatos Telefônicos</Typography>
+        <Divider sx={{ my: 2 }} />
         <PhoneContactsTable 
           contacts={customer.phoneContacts}
           onUpdateContact={handleUpdateContact}
           editable={isEditing}
         />
-        <Divider sx={{ my: 2 }} />
+      </Card>
+      <Card sx={{p: 2}}>
         <Typography variant="h6">Contatos de E-mail</Typography>
+        <Divider sx={{ my: 2 }} />
         <EmailContactsTable 
           contacts={customer.emailContacts}
           onUpdateContact={handleUpdateEmailContact}
           editable={isEditing} 
         />
       </Card>
-      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" onClick={() => router.push(paths.dashboard.customers)}>
-          Voltar para a lista
-        </Button>
-      </Stack>
-
+      
       {/* Confirmation Dialog */}
       <Dialog
         open={openConfirmDialog}
