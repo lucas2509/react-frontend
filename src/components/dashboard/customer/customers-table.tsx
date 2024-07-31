@@ -1,6 +1,6 @@
 // src/components/dashboard/customer/customers-table.tsx
 import * as React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 export interface TableCustomer {
@@ -57,7 +57,9 @@ const CustomersTable: React.FC<CustomersTableProps> = ({ rows, count, onRowClick
                 },
               }}
             >
-              <TableCell>{row.name}</TableCell>
+              <TableCell><Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
+                      <Avatar src={row.avatar} />{row.name}
+                    </Stack></TableCell>
               <TableCell>{row.email}</TableCell>
               <TableCell>{row.phone}</TableCell>
               <TableCell>{`${row.address.street}, ${row.address.city}, ${row.address.state}, ${row.address.country}`}</TableCell>

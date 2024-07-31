@@ -91,7 +91,7 @@ export function CustomersFilters({ onFilter }: CustomersFiltersProps): React.JSX
           sx={{ flex: 1, maxWidth: '100%' }}
         />
         <Button variant="contained" color="primary" onClick={handleFilterClick}>
-          Filtrar
+          Pesquisar
         </Button>
       </Stack>
     </Card>

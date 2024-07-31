@@ -67,6 +67,29 @@ export async function deleteCustomerById(id: number): Promise<void> {
   }
 }
 
+export async function createCustomer(newCustomer: Customer): Promise<void> {
+  const url = `http://192.168.100.132:3000/api/customer`;
+
+  console.log('newCustomer -> '+ JSON.stringify(newCustomer));
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newCustomer),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    console.log('Customer created successfully');
+  } catch (error) {
+    console.error('Failed to create customer', error);
+    throw error;
+  }
+}
+
 export async function updateCustomerById(id: number, customerData: Partial<CustomerAPI>): Promise<void> {
   const url = `http://192.168.100.132:3000/api/customer/${id}`;
 

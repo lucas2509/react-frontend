@@ -1,3 +1,4 @@
+// CustomerDetailPage.tsx
 'use client';
 import * as React from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -8,6 +9,7 @@ import { Customer, PhoneContact, EmailContact } from '@/types/customer-api';
 import PhoneContactsTable from '@/components/dashboard/customer/phone-contacts-table';
 import EmailContactsTable from '@/components/dashboard/customer/email-contacts-table';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+
 
 export default function CustomerDetailPage(): React.JSX.Element {
   const router = useRouter();
@@ -62,10 +64,10 @@ export default function CustomerDetailPage(): React.JSX.Element {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked } = e.target;
-  
+
     setCustomer(prevCustomer => {
       if (!prevCustomer) return prevCustomer;
-  
+
       if (name === "isCorrespondenceAddress") {
         return {
           ...prevCustomer,
@@ -73,11 +75,9 @@ export default function CustomerDetailPage(): React.JSX.Element {
         };
       }
 
-      // Se addressType for especificado, atualiza o endereço correspondente
       const prefix = name.split('.')[0];
-      console.log('prefixo -> ' + prefix)
       if (prefix === "address" || prefix === "correspondenceAddress") {
-        const prefixName =  name.split('.')[1];
+        const prefixName = name.split('.')[1];
         return {
           ...prevCustomer,
           [prefix]: {
@@ -86,15 +86,39 @@ export default function CustomerDetailPage(): React.JSX.Element {
           }
         };
       }
-  
-      // Caso contrário, atualiza o nível superior
+
       return {
         ...prevCustomer,
         [name]: value
       };
     });
   };
-  
+
+  const handleUpdateContact = (updatedContact: PhoneContact) => {
+    if (customer) {
+      const updatedContacts = customer.phoneContacts.map(contact =>
+        contact.id === updatedContact.id ? updatedContact : contact
+      );
+
+      setCustomer({
+        ...customer,
+        phoneContacts: updatedContacts
+      });
+    }
+  };
+
+  const handleUpdateEmailContact = (updatedContact: EmailContact) => {
+    if (customer) {
+      const updatedContacts = customer.emailContacts.map(contact =>
+        contact.email === updatedContact.email ? updatedContact : contact
+      );
+
+      setCustomer({
+        ...customer,
+        emailContacts: updatedContacts
+      });
+    }
+  };
 
   if (!customer) {
     return <Typography>Loading...</Typography>;
@@ -183,65 +207,65 @@ export default function CustomerDetailPage(): React.JSX.Element {
         <Stack spacing={1}>
           {isEditing ? (
             <>
+            <TextField
+              name="name"
+              label="Nome"
+              value={customer.name}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            {customer.type === 'PF' ? (
               <TextField
-                name="name"
-                label="Nome"
-                value={customer.name}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              {customer.type === 'PF' ? (
-                <TextField
-                name="cpf"
-                label="CPF"
-                value={customer.cpf}
-                onChange={handleInputChange}
-                fullWidth
-              />) : (<></>)}
-              {customer.type === 'PJ' ? (
-                <TextField
-                name="businessName"
-                label="Nome da Empresa"
-                value={customer.businessName || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              ) : (<></>)}
-              {customer.type === 'PJ' ? (
-                <TextField
-                name="cnpj"
-                label="CNPJ"
-                value={customer.cnpj || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              ) : (<></>)}
+              name="cpf"
+              label="CPF"
+              value={customer.cpf}
+              onChange={handleInputChange}
+              fullWidth
+            />) : (<></>)}
+            {customer.type === 'PJ' ? (
               <TextField
-                name="identityDocument"
-                label="Documento de Identidade"
-                value={customer.identityDocument || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              {customer.type === 'PF' ? (
-                <TextField
-                name="birthDate"
-                label="Data de Nascimento"
-                value={customer.birthDate || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              ) : (<></>)}
-              {customer.type === 'PF' ? (
-                 <TextField
-                 name="motherName"
-                 label="Nome da Mãe"
-                 value={customer.motherName || ''}
-                 onChange={handleInputChange}
-                 fullWidth
-               />
-              ) : (<></>)}
-            </>
+              name="businessName"
+              label="Nome da Empresa"
+              value={customer.businessName || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            ) : (<></>)}
+            {customer.type === 'PJ' ? (
+              <TextField
+              name="cnpj"
+              label="CNPJ"
+              value={customer.cnpj || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            ) : (<></>)}
+            <TextField
+              name="identityDocument"
+              label="Documento de Identidade"
+              value={customer.identityDocument || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            {customer.type === 'PF' ? (
+              <TextField
+              name="birthDate"
+              label="Data de Nascimento"
+              value={customer.birthDate || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            ) : (<></>)}
+            {customer.type === 'PF' ? (
+               <TextField
+               name="motherName"
+               label="Nome da Mãe"
+               value={customer.motherName || ''}
+               onChange={handleInputChange}
+               fullWidth
+             />
+            ) : (<></>)}
+          </>
           ) : (
             <>
               <Typography><strong>Nome:</strong> {customer.name}</Typography>
@@ -258,118 +282,111 @@ export default function CustomerDetailPage(): React.JSX.Element {
         <Stack spacing={1}>
           {isEditing ? (
             <>
-              <Typography variant="h6">Endereço</Typography>
-              <TextField
-                name="address.street"
-                label="Endereço"
-                value={customer.address.street || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="address.number"
-                label="Número"
-                value={customer.address.number || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="address.neighborhood"
-                label="Bairro"
-                value={customer.address.neighborhood || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="address.city"
-                label="Cidade"
-                value={customer.address.city || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="address.state"
-                label="Estado"
-                value={customer.address.state || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="address.country"
-                label="País"
-                value={customer.address.country || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <TextField
-                name="correspondenceAddress.street"
-                label="Endereço de Correspondência"
-                value={customer.correspondenceAddress?.street || ''}
-                onChange={handleInputChange}
-                fullWidth
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="isCorrespondenceAddress"
-                    checked={customer.isCorrespondenceAddress}
-                    onChange={handleInputChange}
-                  />
-                }
-                label="Endereço de Correspondência"
-              />
-              {customer.isCorrespondenceAddress ? (
-                <>
-                  <TextField
-                    name="correspondenceAddress.street"
-                    label="Endereço"
-                    value={customer.correspondenceAddress.street || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                  <TextField
-                    name="correspondenceAddress.number"
-                    label="Número"
-                    value={customer.correspondenceAddress.number || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                  <TextField
-                    name="correspondenceAddress.neighborhood"
-                    label="Bairro"
-                    value={customer.correspondenceAddress.neighborhood || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                  <TextField
-                    name="correspondenceAddress.city"
-                    label="Cidade"
-                    value={customer.correspondenceAddress.city || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                  <TextField
-                    name="correspondenceAddress.state"
-                    label="Estado"
-                    value={customer.correspondenceAddress.state || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                  <TextField
-                    name="correspondenceAddress.country"
-                    label="País"
-                    value={customer.correspondenceAddress.country || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                  />
-                </>) : (<></>) }
-            </>
+            <Typography variant="h6">Endereço</Typography>
+            <TextField
+              name="address.street"
+              label="Endereço"
+              value={customer.address.street || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              name="address.number"
+              label="Número"
+              value={customer.address.number || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              name="address.neighborhood"
+              label="Bairro"
+              value={customer.address.neighborhood || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              name="address.city"
+              label="Cidade"
+              value={customer.address.city || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              name="address.state"
+              label="Estado"
+              value={customer.address.state || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              name="address.country"
+              label="País"
+              value={customer.address.country || ''}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isCorrespondenceAddress"
+                  checked={customer.isCorrespondenceAddress}
+                  onChange={handleInputChange}
+                />
+              }
+              label="Endereço de Correspondência"
+            />
+            {customer.isCorrespondenceAddress ? (
+              <>
+                <TextField
+                  name="correspondenceAddress.street"
+                  label="Endereço"
+                  value={customer.correspondenceAddress.street || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="correspondenceAddress.number"
+                  label="Número"
+                  value={customer.correspondenceAddress.number || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="correspondenceAddress.neighborhood"
+                  label="Bairro"
+                  value={customer.correspondenceAddress.neighborhood || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="correspondenceAddress.city"
+                  label="Cidade"
+                  value={customer.correspondenceAddress.city || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="correspondenceAddress.state"
+                  label="Estado"
+                  value={customer.correspondenceAddress.state || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+                <TextField
+                  name="correspondenceAddress.country"
+                  label="País"
+                  value={customer.correspondenceAddress.country || ''}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              </>) : (<></>) }
+          </>
           ) : (
             <>
               <Typography><strong>Endereço:</strong> {customer.address.street}, {customer.address.number}, {customer.address.neighborhood}, {customer.address.city}, {customer.address.state}, {customer.address.country}</Typography>
-              {customer.isCorrespondenceAddress ? (
+              {customer.isCorrespondenceAddress && (
                 <Typography><strong>Endereço de Correspondência:</strong> {customer.correspondenceAddress ? `${customer.correspondenceAddress.street}, ${customer.correspondenceAddress.number}, ${customer.correspondenceAddress.neighborhood}, ${customer.correspondenceAddress.city}, ${customer.correspondenceAddress.state}, ${customer.correspondenceAddress.country}` : 'N/A'}</Typography>
-                ) :(<></> )}
+              )}
             </>
           )}
         </Stack>
@@ -377,12 +394,16 @@ export default function CustomerDetailPage(): React.JSX.Element {
         <Typography variant="h6">Contatos Telefônicos</Typography>
         <PhoneContactsTable 
           contacts={customer.phoneContacts}
-          onUpdateContact={() => {}}
-          editable={isEditing} // ou false, dependendo se você deseja a tabela editável ou não
+          onUpdateContact={handleUpdateContact}
+          editable={isEditing}
         />
         <Divider sx={{ my: 2 }} />
         <Typography variant="h6">Contatos de E-mail</Typography>
-        <EmailContactsTable contacts={customer.emailContacts} />
+        <EmailContactsTable 
+          contacts={customer.emailContacts}
+          onUpdateContact={handleUpdateEmailContact}
+          editable={isEditing} 
+        />
       </Card>
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" onClick={() => router.push(paths.dashboard.customers)}>
@@ -402,25 +423,18 @@ export default function CustomerDetailPage(): React.JSX.Element {
       >
         <DialogTitle>Confirmar Exclusão</DialogTitle>
         <DialogContent>
-          <Stack spacing={2}>
-            <Typography>Tem certeza de que deseja excluir este cadastro?</Typography>
-            <Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>
-              <Button onClick={handleCloseConfirmDialog}>Cancelar</Button>
-              <Button color="error" onClick={handleConfirmDelete}>Excluir</Button>
-            </Stack>
-          </Stack>
+          <Typography>Tem certeza de que deseja excluir este cliente?</Typography>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog}>Cancelar</Button>
+          <Button onClick={handleConfirmDelete} color="error">Excluir</Button>
+        </DialogActions>
       </Dialog>
 
       {/* Feedback Dialog */}
       <Dialog
         open={openFeedbackDialog}
         onClose={handleCloseFeedbackDialog}
-        sx={{
-          '& .MuiDialog-paper': {
-            marginTop: '15vh', // Ajusta a margem superior para alinhar com o conteúdo da página
-          }
-        }}
       >
         <DialogTitle>{feedbackSeverity === 'success' ? 'Sucesso' : 'Erro'}</DialogTitle>
         <DialogContent>

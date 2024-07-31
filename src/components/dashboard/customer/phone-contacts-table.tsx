@@ -1,35 +1,39 @@
+// phone-contacts-table.tsx
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Checkbox } from '@mui/material';
 import React, { useState } from 'react';
 import { PhoneContact } from '@/types/customer-api';
-import CheckIcon from '@mui/icons-material/Check'; // Ícone de marcação
-import ClearIcon from '@mui/icons-material/Clear'; // Ícone de não marcação
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 
 interface PhoneContactsTableProps {
   contacts: PhoneContact[];
-  onUpdateContact: (updatedContact: PhoneContact) => void; // Função para atualizar o contato
-  editable: boolean; // Propriedade para definir se a tabela está editável
+  onUpdateContact: (updatedContact: PhoneContact) => void;
+  editable: boolean;
 }
 
 const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpdateContact, editable }) => {
-  const [editingContact, setEditingContact] = useState<PhoneContact | null>(null);
   const [localContacts, setLocalContacts] = useState(contacts);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>, field: keyof PhoneContact) => {
-    const { value, checked, type } = event.target;
-  
-    const updatedContacts = localContacts.map(contact =>
-      contact.phone === editingContact?.phone
-        ? {
-            ...contact,
-            [field]: type === 'checkbox' ? checked : value
-          }
-        : contact
-    );
-  
-    setLocalContacts(updatedContacts);
-  
-    // Se precisar salvar automaticamente, descomente a linha abaixo:
-    // onUpdateContact(updatedContacts.find(c => c.phone === editingContact?.phone) || contact);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    id: number,
+    field: keyof PhoneContact
+  ) => {
+    const target = e.target as HTMLInputElement;
+    const { value, checked, type } = target;
+
+    const newContacts = localContacts.map(contact => {
+      if (contact.id === id) {
+        return {
+          ...contact,
+          [field]: type === 'checkbox' ? checked : value
+        };
+      }
+      return contact;
+    });
+
+    setLocalContacts(newContacts);
+    onUpdateContact(newContacts.find(contact => contact.id === id)!);
   };
 
   const columns = [
@@ -50,12 +54,12 @@ const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpd
         </TableHead>
         <TableBody>
           {localContacts.map((contact) => (
-            <TableRow key={contact.phone}>
+            <TableRow key={contact.id}>
               <TableCell>
                 {editable ? (
                   <TextField
                     value={contact.phone}
-                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'phone')}
+                    onChange={(e) => handleChange(e, contact.id as number, 'phone')}
                     fullWidth
                   />
                 ) : (
@@ -66,7 +70,7 @@ const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpd
                 {editable ? (
                   <TextField
                     value={contact.name}
-                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'name')}
+                    onChange={(e) => handleChange(e, contact.id as number, 'name')}
                     fullWidth
                   />
                 ) : (
@@ -77,7 +81,7 @@ const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpd
                 {editable ? (
                   <Checkbox
                     checked={contact.isWhatsapp}
-                    onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, 'isWhatsapp')}
+                    onChange={(e) => handleChange(e, contact.id as number, 'isWhatsapp')}
                   />
                 ) : contact.isWhatsapp ? (
                   <CheckIcon color="success" />
@@ -85,7 +89,6 @@ const PhoneContactsTable: React.FC<PhoneContactsTableProps> = ({ contacts, onUpd
                   <ClearIcon color="error" />
                 )}
               </TableCell>
-
             </TableRow>
           ))}
         </TableBody>

@@ -11,28 +11,43 @@ import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import { config } from '@/config';
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import CustomersTable, { TableCustomer } from '@/components/dashboard/customer/customers-table';
-import { fetchCustomers } from '@/services/customer-service';
+import { fetchCustomers, createCustomer } from '@/services/customer-service';
 import { useRouter } from 'next/navigation';
+import CustomerModal from '@/components/dashboard/customer/new-customer-modal';
+import { Customer } from '@/types/customer-api';
 
 export default function Page(): React.JSX.Element {
   const [customers, setCustomers] = React.useState<TableCustomer[]>([]);
   const [page, setPage] = React.useState(0);
   const [filters, setFilters] = React.useState<{ [key: string]: string }>({});
+  const [openModal, setOpenModal] = React.useState(false);
+  const [feedbackMessage, setFeedbackMessage] = React.useState('');
+  const [feedbackSeverity, setFeedbackSeverity] = React.useState<'success' | 'error'>('success');
   const rowsPerPage = 5;
   const router = useRouter();
 
-  React.useEffect(() => {
-    async function loadCustomers() {
-      try {
-        const { customers: fetchedCustomers } = await fetchCustomers({
-          ...filters,
-          page: page + 1, // Supondo que a API usa páginas baseadas em 1
-          limit: rowsPerPage,
-        });
-
-        const transformedCustomers: TableCustomer[] = fetchedCustomers.map((apiCustomer) => ({
-          id: apiCustomer.id.toString(),
-          avatar: '',
+  const loadCustomers = async () => {
+    try {
+      const fetchedCustomers = await fetchCustomers({
+        ...filters,
+        page: page + 1, // Supondo que a API usa páginas baseadas em 1
+        limit: rowsPerPage,
+      });
+  
+      console.log('API response:', fetchedCustomers); // Verifique a resposta aqui
+  
+      if (!Array.isArray(fetchedCustomers)) {
+        console.error('fetchedCustomers is not an array:', fetchedCustomers);
+        return;
+      }
+  
+      const transformedCustomers: TableCustomer[] = fetchedCustomers.map((apiCustomer) => {
+        console.log('apiCustomer.id ->', apiCustomer.id);
+  
+        const customerId = apiCustomer.id as number;
+        return {
+          id: customerId.toString(),
+          avatar: '', // Adicione a lógica para o avatar se necessário
           name: apiCustomer.name,
           email: apiCustomer.emailContacts[0]?.email ?? '',
           address: {
@@ -43,12 +58,16 @@ export default function Page(): React.JSX.Element {
           },
           phone: apiCustomer.phoneContacts[0]?.phone ?? '',
           createdAt: new Date(apiCustomer.updatedAt),
-        }));
-        setCustomers(transformedCustomers);
-      } catch (error) {
-        console.error('Failed to fetch customers', error);
-      }
+        };
+      });
+  
+      setCustomers(transformedCustomers);
+    } catch (error) {
+      console.error('Failed to fetch customers', error);
     }
+  };
+
+  React.useEffect(() => {
     loadCustomers();
   }, [page, filters]);
 
@@ -59,6 +78,28 @@ export default function Page(): React.JSX.Element {
 
   const handleRowClick = (id: string) => {
     router.push(`/dashboard/customers/${id}`);
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleSaveCustomer = async (customer: Customer) => {
+    try {
+      await createCustomer(customer);
+      setFeedbackMessage('Cliente cadastrado com sucesso!');
+      setFeedbackSeverity('success');
+      handleCloseModal();
+      // Atualize a lista de clientes após salvar
+      loadCustomers();
+    } catch (error) {
+      setFeedbackMessage('Erro ao cadastrar cliente.');
+      setFeedbackSeverity('error');
+    }
   };
 
   const paginatedCustomers = applyPagination(customers, page, rowsPerPage);
@@ -78,7 +119,7 @@ export default function Page(): React.JSX.Element {
           </Stack>
         </Stack>
         <div>
-          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained" onClick={handleOpenModal}>
             Novo Cliente
           </Button>
         </div>
@@ -90,6 +131,13 @@ export default function Page(): React.JSX.Element {
         rows={paginatedCustomers}
         rowsPerPage={rowsPerPage}
         onRowClick={handleRowClick}
+      />
+      <CustomerModal
+        open={openModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveCustomer}
+        feedbackMessage={feedbackMessage}
+        feedbackSeverity={feedbackSeverity}
       />
     </Stack>
   );

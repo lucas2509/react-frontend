@@ -42,12 +42,6 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
       >
         <Stack spacing={3}>
           <Stack spacing={1}>
-            <Typography color="inherit" sx={{ fontSize: '24px', lineHeight: '32px', textAlign: 'center' }} variant="h1">
-              Welcome to{' '}
-              <Box component="span" sx={{ color: '#15b79e' }}>
-                Devias Kit
-              </Box>
-            </Typography>
             <Typography align="center" variant="subtitle1">
               A professional template that comes with ready-to-use MUI components.
             </Typography>

@@ -1,5 +1,5 @@
 export interface Address {
-  id: number;
+  id?: number;
   zipCode: string;
   street: string;
   number: string;
@@ -13,20 +13,20 @@ export interface Address {
 }
 
 export interface PhoneContact {
-  id: number;
+  id?: number;
   phone: string;
   name: string;
   isWhatsapp: boolean;
 }
 
 export interface EmailContact {
-  id: number;
+  id?: number;
   email: string;
   name: string;
 }
 
 export interface Customer {
-  id: number;
+  id?: number;
   type: 'PF' | 'PJ';
   name: string;
   cpf: string | null;
